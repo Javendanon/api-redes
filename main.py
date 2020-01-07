@@ -4,21 +4,22 @@ from flask import (
     jsonify
 )
 
-
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
 @app.route('/verificaRut',methods=['POST'])
 def digitoVerificador():
+
     if (request.method=='POST'):
-        ValueDv = False
+        ValueDv = False    # verificación 
         if ('rut' not in request.form):
             return {
                 'ok': False,
                 'msg': 'Error de ingreso de datos'
             }
-        rut = request.form.get('rut')
-        CompleteRut = rut.split('-')
+        
+        rut = request.form.get('rut') 
+        CompleteRut = rut.split('-')  
         rutUsable = CompleteRut[0]
         if (len(rutUsable)<7):
             return {
@@ -26,9 +27,12 @@ def digitoVerificador():
                 'msg': 'El rut ingresado '+ rut +' no es valido'
             }
         suma = sumaRut(rutUsable)
+        if (suma==0):
+            return {
+                'ok':False,
+                'msg': 'El rut ingresado ' + rut + ' es invalido o el formato esta errado'
+            }
         dv = (11-(suma%11))
-        print(suma)
-        print(dv)
         if (CompleteRut[1] in (0,1,2,3,4,5,6,7,8,9,'1','2','3','4','5','6','7','8','9','K','k','0')):
             ValueDv = True
         if (CompleteRut[1]=='K' or CompleteRut[1]=='k'):
@@ -55,7 +59,7 @@ def digitoVerificador():
         else:
             return {
                 'ok': False,
-                'msg': 'El rut ingresado ' + rut + ' es invalido y tiene como digito verificador ' + CompleteRut[1]
+                'msg': 'El rut ingresado ' + rut + ' es invalido o el formato esta errado'
             }
         return  {
             'ok': False,
@@ -66,6 +70,9 @@ def sumaRut(rut):
     k=2
     rutInvertido = rut[::-1]
     for i in range(len(rut)):
+        if rutInvertido[i] not in (0,1,2,3,4,5,6,7,8,9,'1','2','3','4','5','6','7','8','9','0'):
+            suma=0
+            return suma
         if (i<6):
             suma = suma + int(rutInvertido[i])*k
             k+=1
@@ -84,9 +91,14 @@ def nombrePropio():
         apellido_m = request.form.get('apellido_m')
         apellido_p = request.form.get('apellido_p')
         gender = request.form.get('gender')
-        if gender=='M':
+        if (gender not in ('M','m','F','f')):
+            return {
+                'ok': False,
+                'msg': 'El genero no coincide con lo permitido, ingrese (M,F,m,f)'
+            }
+        if gender=='M' or gender=='m':
             gender='Sr.'
-        elif gender=='F':
+        elif gender=='F' or gender=='f':
             gender='Sra.'
         nombreCompleto = gender + ' ' + name + ' ' + apellido_p + ' ' + apellido_m
         return {
