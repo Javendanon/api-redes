@@ -91,6 +91,18 @@ def nombrePropio():
         apellido_m = request.form.get('apellido_m')
         apellido_p = request.form.get('apellido_p')
         gender = request.form.get('gender')
+        arrayInput = [
+            name,
+            apellido_m,
+            apellido_p,
+            gender
+        ]
+        for i in arrayInput:
+            if (checkInput(i)):
+                return {
+                    'ok': False,
+                    'msg': 'No se permiten caracteres a excepcion de letras en los nombres'
+                }
         if (gender not in ('M','m','F','f')):
             return {
                 'ok': False,
@@ -105,5 +117,7 @@ def nombrePropio():
             'ok': True,
             'msg': 'Hola '+ nombreCompleto.title()
         }
-
+    
+def checkInput(inputString):
+    return any(char.isdigit() for char in inputString)
 app.run()
